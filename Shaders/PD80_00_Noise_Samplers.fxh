@@ -42,14 +42,19 @@ sampler samplerGaussNoise
 
 // Functions
 uniform float2 pp < source = "pingpong"; min = 0; max = 128; step = 1; >;
-static const float2 dither_uv = float2( BUFFER_WIDTH, BUFFER_HEIGHT ) / 512.0f;
+
+float2 get_dither_uv()
+{
+    return float2( BUFFER_WIDTH / 512.0f, BUFFER_HEIGHT / 512.0f );
+}
 
 float4 dither( sampler2D tex, float2 coords, int var, bool enabler, float str, bool motion, float swing )
 {
-    coords.xy    *= dither_uv.xy;
-    float4 noise  = tex2D( tex, coords.xy );
-    float mot     = motion ? pp.x + var : 0.0f;
-    noise         = frac( noise + 0.61803398875f * mot );
-    noise         = ( noise * 2.0f - 1.0f ) * swing;
+    float2 dither_uv = get_dither_uv();
+    coords.xy *= dither_uv.xy;
+    float4 noise = tex2D( tex, coords.xy );
+    float mot = motion ? pp.x + var : 0.0f;
+    noise = frac( noise + 0.61803398875f * mot );
+    noise = ( noise * 2.0f - 1.0f ) * swing;
     return ( enabler ) ? noise * ( str / 255.0f ) : float4( 0.0f, 0.0f, 0.0f, 0.0f );
 }
